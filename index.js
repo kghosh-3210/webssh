@@ -1,6 +1,7 @@
 const readline = require('readline')
 const { NodeSSH } = require('node-ssh');
 const ssh = new NodeSSH();
+const colors = require("colors")
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -22,7 +23,7 @@ function disconnect_ssh()
 {
     rl.close();
     ssh.dispose();
-    console.log("Disconnected");
+    console.log("Disconnected".red);
     process.exit(0);
 }
 
@@ -30,8 +31,8 @@ function execcmd(command)
 {
     const fullCommand = `cd ${currentPath} && ${command}`;
     ssh.execCommand(fullCommand).then((result)=>{
-        console.log("output :-");
-        console.log(result.stdout);
+       // console.log("output :-");
+        console.log(result.stdout.green);
         if (result.stderr) console.error(result.stderr);
         rl.prompt(); 
     }).catch((err)=>{
@@ -42,19 +43,19 @@ function execcmd(command)
 
 function CommandLineInterface()
 {
-    console.log("Command shell started...")
+    console.log("Command shell started...".green)
     rl.prompt();
     rl.on("line",(input)=>
     {
         const command = input.trim();
         if(command.toLowerCase() == 'exit')
         {
-            console.log("exited... connection will be open");
+            console.log("exited... connection will be open".yellow);
             rl.prompt();
         }
         else if(command.toLowerCase() == "disconnect")
         {
-            console.log("disconnected...")
+            console.log("disconnected...".red)
             disconnect_ssh();
         }
         else if (command.includes('cd ')) {
@@ -65,13 +66,13 @@ function CommandLineInterface()
             ssh.execCommand(testCommand).then((result) => {
                 if (result.stdout) {
                     currentPath = result.stdout.trim();
-                    console.log(`Directory changed to: ${currentPath}`);
+                    console.log(`Directory changed to: ${currentPath}`.green);
                 } else if (result.stderr) {
-                    console.error(`Failed to change directory: ${result.stderr}`);
+                    console.error(`Failed to change directory: ${result.stderr}`.red);
                 }
                 rl.prompt();
             }).catch((err) => {
-                console.error('Error changing directory:', err.message);
+                console.error('Error changing directory:', err.message.red);
                 rl.prompt();
             });
         }
@@ -83,13 +84,13 @@ function CommandLineInterface()
 
 function Connect_to_device()
 {
-    console.log("Connecting....");
+    console.log("Connecting....".blue);
     ssh.connect(config).then(()=>{
-        console.log("Connected...");
+        console.log("Connected...".blue);
         CommandLineInterface()
     })
     .catch((err)=>{
-        console.log("Connection failed...")
+        console.log("Connection failed...".red)
         console.error(err);
         disconnect_ssh();
     })
